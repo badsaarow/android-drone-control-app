@@ -1,0 +1,195 @@
+<html>
+<head>
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width" name="viewport">
+    <script>
+      const joystick = { lpx: 0, lpy: 0, rpx: 0, rpy: 0 };
+      const drone = {
+          interval: null
+      }
+      function takeOff() {
+          fetch(
+              "/ctl?takeOff=1"
+          ).then((response) => console.log(response));
+      }
+      function getControl() {
+          fetch(
+              "/ctl?owner=1"
+          ).then((response) => console.log(response));
+      }
+      function leaveControl() {
+          fetch(
+              "/ctl?owner=0"
+          ).then((response) => console.log(response));
+      }
+      function increaseSmoothly(curr, max) {
+        return max - curr >= 0.01 ? curr + 0.01 : curr;
+      }
+      function decreaseSmoothly(curr, min) {
+        return min - curr <= -0.02 ? curr - 0.02 : curr;
+      }
+      function stopSmoothly() {
+          console.log('stopSmoothly');
+          if (!!drone.interval) {
+              clearInterval(drone.interval);
+              drone.interval = null;
+          }
+
+          if (joystick.lpx != 0) {
+              joystick.lpx = joystick.lpx > 0 ? joystick.lpx -0.01: joystick.lpx +0.01;
+          }
+          if (joystick.lpy != 0) {
+              joystick.lpy = joystick.lpy > 0 ? joystick.lpy -0.01: joystick.lpy +0.01;
+          }
+          if (joystick.rpx != 0) {
+              joystick.rpx = joystick.rpx > 0 ? joystick.rpx -0.01: joystick.rpx +0.01;
+          }
+          if (joystick.rpy != 0) {
+              joystick.rpy = joystick.rpy > 0 ? joystick.rpy -0.01: joystick.rpy +0.01;
+          }
+
+          callMove();
+          if (joystick.lpx != 0 || joystick.lpy != 0 || joystick.rpx != 0 || joystick.rpy != 0) {
+              drone.interval = setInterval(function () {
+                  stopSmoothly();
+              }, 100);
+          }
+      }
+      function handleKeyDown(e) {
+        if (e.code == "KeyW") {
+          joystick.lpy = increaseSmoothly(joystick.lpy, 0.10);
+        } else if (e.code == "KeyS") {
+          joystick.lpy = decreaseSmoothly(joystick.lpy, -0.10);
+        } else if (e.code == "KeyA") {
+          joystick.lpx = decreaseSmoothly(joystick.lpx, -0.10);
+        } else if (e.code == "KeyD") {
+          joystick.lpx = increaseSmoothly(joystick.lpx, 0.10);
+        } else if (e.code == "KeyI") {
+          joystick.rpy = increaseSmoothly(joystick.rpy, 0.50);
+        } else if (e.code == "KeyK") {
+          joystick.rpy = decreaseSmoothly(joystick.rpy, -0.50);
+        } else if (e.code == "KeyJ") {
+          joystick.rpx = decreaseSmoothly(joystick.rpx, -0.50);
+        } else if (e.code == "KeyL") {
+          joystick.rpx = increaseSmoothly(joystick.rpx, 0.50);
+        }
+        startMove();
+      }
+
+      function callMove() {
+          document.getElementById("log").textContent =
+              "lpx=" +
+              joystick.lpx +
+              "&lpy=" +
+              joystick.lpy +
+              "&rpx=" +
+              joystick.rpx +
+              "&rpy=" +
+              joystick.rpy;
+          fetch(
+              "/cmd?lpx=" +
+              joystick.lpx +
+              "&lpy=" +
+              joystick.lpy +
+              "&rpx=" +
+              joystick.rpx +
+              "&rpy=" +
+              joystick.rpy
+          ).then((response) => console.log(response));
+      }
+
+      function startMove() {
+        if (drone.interval == null) {
+            drone.interval = setInterval(function () {
+                callMove();
+            }, 100);
+        }
+      }
+      function stopMove() {
+        joystick.lpx = 0;
+        joystick.lpy = 0;
+        joystick.rpx = 0;
+        joystick.rpy = 0;
+        clearInterval(drone.interval);
+        drone.interval = null;
+      }
+      function stopHere() {
+        stopMove();
+        fetch(
+          "/cmd?lpx=" +
+            joystick.lpx +
+            "&lpy=" +
+            joystick.lpy +
+            "&rpx=" +
+            joystick.rpx +
+            "&rpy=" +
+            joystick.rpy
+        ).then((response) => console.log(response));
+      }
+    </script>
+</head>
+<body>
+<div>
+    <button id="stop">STOP</button>
+    <div class="left">
+        <button id="lleft">LEFT</button>
+        <button id="lright">RIGHT</button>
+        <button id="lup">UP</button>
+        <button id="ldown">DOWN</button>
+    </div>
+    <div class="right">
+        <button id="rleft">LEFT</button>
+        <button id="rright">RIGHT</button>
+        <button id="rup">UP</button>
+        <button id="rdown">DOWN</button>
+    </div>
+</div>
+<div><p id="log"></p></div>
+<a href="/">Home</a><br><br/>
+<button onClick="getControl">Get Control</button>
+<button onClick="leaveControl">Leave Control</button><br>
+<button onClick="takeOff">Take Off</button>
+<script>
+      function onkeydown(e) {
+        const key = document.getElementById(e.currentTarget.id);
+        if (key.id == "lleft") {
+          handleKeyDown({ code: "KeyA" });
+        } else if (key.id == "lright") {
+          handleKeyDown({ code: "KeyD" });
+        } else if (key.id == "lup") {
+          handleKeyDown({ code: "KeyW" });
+        } else if (key.id == "ldown") {
+          handleKeyDown({ code: "KeyD" });
+        } else if (key.id == "rleft") {
+          handleKeyDown({ code: "KeyJ" });
+        } else if (key.id == "rright") {
+          handleKeyDown({ code: "KeyL" });
+        } else if (key.id == "rup") {
+          handleKeyDown({ code: "KeyI" });
+        } else if (key.id == "rdown") {
+          handleKeyDown({ code: "KeyK" });
+        }
+        startMove();
+      }
+      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keyup", stopSmoothly);
+      document.getElementById("stop").onmousedown = stopHere;
+      document.getElementById("lleft").onmousedown = onkeydown;
+      document.getElementById("lright").onmousedown = onkeydown;
+      document.getElementById("lup").onmousedown = onkeydown;
+      document.getElementById("ldown").onmousedown = onkeydown;
+      document.getElementById("rleft").onmousedown = onkeydown;
+      document.getElementById("rright").onmousedown = onkeydown;
+      document.getElementById("rup").onmousedown = onkeydown;
+      document.getElementById("rdown").onmousedown = onkeydown;
+      document.getElementById("lleft").onmouseup = stopSmoothly;
+      document.getElementById("lright").onmouseup = stopSmoothly;
+      document.getElementById("lup").onmouseup = stopSmoothly;
+      document.getElementById("ldown").onmouseup = stopSmoothly;
+      document.getElementById("rleft").onmouseup = stopSmoothly;
+      document.getElementById("rright").onmouseup = stopSmoothly;
+      document.getElementById("rup").onmouseup = stopSmoothly;
+      document.getElementById("rdown").onmouseup = stopSmoothly;
+    </script>
+</body>
+</html>

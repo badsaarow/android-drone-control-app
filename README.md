@@ -1,81 +1,79 @@
-# drone
+# ETRI Drone Crontrol Bridge Android App 
 
-## Preparationis
+## Prerequisite
+- DJI drone
+- DJI controller
+- Android: DJI Pilot (or Flight) App, This App, WiFi
+- Chrome browser: GamePad enabled
+- GamePad USB
 
-- Install Android Studio
+## Step
+1. 안드로드폰에 DJI 앱과, 이 앱 설치
+2. 안드로드이드폰과 DJI controller usb로 연결
+3. 기체와 조종기 바인딩
+4. 앱 실행(앱이 usb accessarry 권한 수락)
+5. 브라우저에서 앱이 열어놓은 웹서버 포트로 접속
+6. Register
 
-- Install Flutter
-```powershell
-scoop install flutter
-flutter doctor --android-licenses
+## Troubleshooting
+
+- browser에서 직접 적속하면 http라서 연결이 대부분 막히므로 curl로 확인한다.
+- 
+```shell
+sungyong@m1pro ~ % nc -nvv -w 1 -z 192.168.123.225 1-9000
+sungyong@m1pro ~ % curl 192.168.123.225:8888
+<html><body><h1>Hello server</h1>
+<form action='?' method='get'>
+<p>Your name: <input type='text' name='username'></p>
+</form>
+</body></html>
+
 ```
 
+## Setting
 
-## Launch
+YawControlMode: ANGLE
+YawControlMode: ANGLE
+RollPitchControlMode: ANGLE
+VerticalControlMode: POSITION
+RollPitchCoordinateSystem: GROUND
+isFlightAssistantSupported: true
+isLandingGearMovable: false
+isAccessLockerSupported: false
+isConnected: true
+isOnboardFChannelAvailable: false
+isOnboardSDKDeviceAvailable: false
+isPropellerCalibrationSupported: false
+isRTKSupported: false
+isVirtualFenceSupported: false
+isVirtualStickAdvancedModeEnabled: false
+isVirtualStickControlModeAvailable: true
+
+## Web to Drone
 
 ```shell
-
-> adb devices
-List of devices attached
-ce091609a378171705      unauthorized
-
-> adb tcpip 4455
-restarting in TCP mode port: 4455
-> adb connect 192.168.123.85:4455
-connected to 192.168.123.85:4455
-> fluttter devices
-fluttter: The term 'fluttter' is not recognized as a name of a cmdlet, function, script file, or executable program.
-Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
-> flutter devices
-4 connected devices:
-
-SM G935S (mobile) • 192.168.123.85:4455 • android-arm64  • Android 8.0.0 (API 26)
-Windows (desktop) • windows             • windows-x64    • Microsoft Windows [Version 10.0.19044.1706]
-Chrome (web)      • chrome              • web-javascript • Google Chrome 98.0.4758.102
-Edge (web)        • edge                • web-javascript • Microsoft Edge 101.0.1210.39
-> flutter run
-Launching lib\main.dart on SM G935S in debug mode...
-Running Gradle task 'assembleDebug'...                            202.7s
-✓  Built build\app\outputs\flutter-apk\app-debug.apk.
-Installing build\app\outputs\flutter-apk\app.apk...               122.8s
-Terminate batch job (Y/N)? y
-> flutter run
-Launching lib\main.dart on SM G935S in debug mode...
-Running Gradle task 'assembleDebug'...                             32.5s
-✓  Built build\app\outputs\flutter-apk\app-debug.apk.
-Syncing files to device SM G935S...                                152ms
-
-Flutter run key commands.
-r Hot reload. 🔥🔥🔥
-R Hot restart.
-h List all available interactive commands.
-d Detach (terminate "flutter run" but leave application running).
-c Clear the screen
-q Quit (terminate the application on the device).
-
-💪 Running with sound null safety 💪
-
-An Observatory debugger and profiler on SM G935S is available at: http://127.0.0.1:10716/wCdmEeAQLFo=/
-The Flutter DevTools debugger and profiler on SM G935S is available at: http://127.0.0.1:9100?uri=http://127.0.0.1:10716/wCdmEeAQLFo=/
-D/=== DjiPlugin Android( 4777): Connect Drone Started
+2022-05-16 21:35:42.525 24786-25650/com.dji.sdk.sample D/InputEventReceiver: channel '852b1f7 com.dji.sdk.sample/com.dji.sdk.sample.internal.controller.MainActivity (client)' ~ Disposing input event receiver.
+2022-05-16 21:35:42.526 24786-25650/com.dji.sdk.sample D/InputEventReceiver: channel '852b1f7 com.dji.sdk.sample/com.dji.sdk.sample.internal.controller.MainActivity (client)' ~NativeInputEventReceiver.
+2022-05-16 21:35:42.537 24786-24786/com.dji.sdk.sample D/ViewRootImpl@b495fbb[MainActivity]: MSG_WINDOW_FOCUS_CHANGED 1
+2022-05-16 21:35:42.538 24786-25650/com.dji.sdk.sample E/ViewRootImpl: sendUserActionEvent() returned.
+2022-05-16 21:35:44.614 24786-24793/com.dji.sdk.sample I/zygote64: Do partial code cache collection, code=928KB, data=548KB
+2022-05-16 21:35:44.617 24786-24793/com.dji.sdk.sample I/zygote64: After code cache collection, code=928KB, data=548KB
+2022-05-16 21:35:44.617 24786-24793/com.dji.sdk.sample I/zygote64: Increasing code cache capacity to 3MB
+2022-05-16 21:36:01.092 24786-27013/com.dji.sdk.sample I/WebServer: passCommand /xp
+2022-05-16 21:36:01.092 24786-27013/com.dji.sdk.sample I/VirtualStick: onWebControlEvent /xp
+2022-05-16 21:36:09.447 24786-27181/com.dji.sdk.sample I/WebServer: passCommand /xp
+2022-05-16 21:36:09.447 24786-27181/com.dji.sdk.sample I/VirtualStick: onWebControlEvent /xp
+2022-05-16 21:36:14.269 24786-24799/com.dji.sdk.sample I/zygote64: Background concurrent copying GC freed 818877(27MB) AllocSpace objects, 6(120KB) LOS objects, 32% free, 50MB/74MB, paused 825us total 187.449ms
+2022-05-16 21:36:15.408 24786-27288/com.dji.sdk.sample I/WebServer: passCommand /xp
+2022-05-16 21:36:15.409 24786-27288/com.dji.sdk.sample I/VirtualStick: onWebControlEvent /xp
+2022-05-16 21:36:25.159 24786-27446/com.dji.sdk.sample I/WebServer: passCommand /xp
+2022-05-16 21:36:25.159 24786-27446/com.dji.sdk.sample I/VirtualStick: onWebControlEvent /xp
+2022-05-16 21:36:26.955 24786-27480/com.dji.sdk.sample I/WebServer: passCommand /xp
+2022-05-16 21:36:26.956 24786-27480/com.dji.sdk.sample I/VirtualStick: onWebControlEvent /xp
+2022-05-16 21:36:30.757 24786-27537/com.dji.sdk.sample I/WebServer: passCommand /xp
+2022-05-16 21:36:30.758 24786-27537/com.dji.sdk.sample I/VirtualStick: onWebControlEvent /xp
+2022-05-16 21:36:31.895 24786-24786/com.dji.sdk.sample E/koy$fdd: send to server success: Response{protocol=h2, code=200, message=, url=https://statistical-report.djiservice.org/api/report/web}
+2022-05-16 21:36:36.686 24786-27630/com.dji.sdk.sample I/WebServer: passCommand /xp
+2022-05-16 21:36:36.687 24786-27630/com.dji.sdk.sample I/VirtualStick: onWebControlEvent /xp
 ```
 
-## troubleshooting
-
-```text
-An Observatory debugger and profiler on SM G935S is available at: http://127.0.0.1:59425/8BuTgCC9RgI=/
-```
-
-
-## Rebuild plugin
-
-```shell
-flutter pub run pigeon \
---input pigeons/messages.dart \
---dart_out lib/messages.dart \
---objc_header_out ios/Classes/messages.h \
---objc_source_out ios/Classes/messages.m \
---objc_prefix FLT \
---java_out android/src/main/java/cloud/dragonx/plugin/flutter/dji/Messages.java \
---java_package "cloud.dragonx.plugin.flutter.dji" 
-```
